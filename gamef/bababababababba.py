@@ -70,7 +70,17 @@ if keys[pygame.K_f] and staff_have: # make this so it starts a timer, then when 
             if bullet.rect.colliderect(background_rect) == False:
                 staff_bullets.pop(staff_bullets.index(bullet))                
 
-# when f is held, adds bullets to list & starts a timer
-# if timer is done and bullets are present and f is no longer held
+for coin in coins_list: # FOR COIN COLLECTION DO NOT DELETE 
+        if coin.rect.colliderect(playerA.rect):
+            score+=1
+            coin.kill()
+            del coins_list[coins_list.index(coin)]
 
-# needs to draw when f is released, but not while when f is released
+# sword swing is 3 step process:
+    # draw hitbox
+    # check if hitbox is in contact with coins (enemies later)
+    # if yes, collect coin *
+
+# swing draws the sword, hitbox provides location data
+
+# * need to have coins reference the player hitbox, not sure how
