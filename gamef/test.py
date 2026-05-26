@@ -53,7 +53,7 @@ staff_timer = 0
 
 sword = pickup(390,450, BLUE)
 sword_symbol = pickup(win_width - (border_thick*20),border_thick*2,BLUE)
-sword_hitbox = pickup(playerA.x,playerA.y+playerA.height,BLUE) #WORK HERE AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
 
 border_left = border(0,0,border_thick,win_height)
 border_right = border(win_width - border_thick,0,border_thick,win_height)
@@ -81,6 +81,8 @@ while run:
     if score == (levelup * 10):
         levelup+= levelup
         level+=1
+      
+    
 
     # map & object drawing
     background = pygame.image.load("./images/dice.png") # CHECK WHEN YOU GET ERROR MESSAGES   
@@ -206,14 +208,14 @@ while run:
     if keys[pygame.K_f] and staff_have: # make this so it starts a timer, then when the timer finishes and the key is released shoot
         staff_timer += 0.5 # charge-up shot
 
-    if keys[pygame.K_f] == False and staff_timer < 20:
-        staff_timer = 0 
+    if keys[pygame.K_f] == False and staff_timer < 20 and staff_timer > 0:
+        staff_timer -= 1 # reduces charge of shot
         
     if keys[pygame.K_f] and staff_timer >= 20 and staff_timer % 2 == 0:
         playerA.colour = GREEN
     if keys[pygame.K_f] and staff_timer >= 20 and staff_timer % 10 != 0:
         playerA.colour = RED
-        
+
     if keys[pygame.K_f] == False and staff_timer >= 20: # allowing bullets to be shot
         shoot_button = True
         if len(staff_bullets) <= 20: #max bullet count
@@ -227,9 +229,19 @@ while run:
             bullet.draw()
             if bullet.rect.colliderect(background_rect) == False or len(staff_bullets) > 20:
                 staff_bullets.pop(staff_bullets.index(bullet))
+                
     # sword attack
+    sword_hitbox = pygame.Rect(playerA.x,playerA.y+playerA.height, 20,20)
     if keys[pygame.K_q] and sword_have:
-        sword_symbol.draw()
+        if playerA.direction == 'left':
+            sword_hitbox = pygame.Rect(playerA.x-30,playerA.y+playerA.height//2, 40,20)
+        if playerA.direction == 'right':
+            sword_hitbox = pygame.Rect(playerA.x + playerA.width-10,playerA.y + playerA.height//2, 40,20)
+        if playerA.direction == 'up':
+            sword_hitbox = pygame.Rect(playerA.x,playerA.y-30, 20,40)
+        if playerA.direction == 'down':
+            sword_hitbox = pygame.Rect(playerA.x,playerA.y+playerA.height-10, 20,40)
+        playerA.swing(sword,sword_hitbox,BLUE)
     
     # changing colour
     if keys[pygame.K_1]:
@@ -265,6 +277,7 @@ pygame.quit()
 # figure out how to make charged projectile maybe?idk
 # figure out how to flash green while staff is fully charged
 # figure out how to make a sword
+# make coin collection part of the coin group object 
 
 
 # figured out how to properly blit & load images, how to print text,

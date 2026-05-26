@@ -22,8 +22,10 @@ class player:
     def draw(self): # for drawing the player
         self.rect.topleft = (self.x,self.y)
         pygame.draw.rect(win,self.colour,self.rect)
+    def swing(self,weapon,hitbox,colour):
+        pygame.draw.rect(win,colour,hitbox)
     
-    
+    # every swing, create a hitbox in the direction player is facing 
 
 class pickup(pygame.sprite.Sprite):
     def __init__(self,x,y,colour):
