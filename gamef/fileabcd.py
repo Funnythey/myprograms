@@ -10,7 +10,7 @@ background_rect = background.get_rect()
 
 
 class player:
-    def __init__(self,x,y,width,height,colour): #for initializing the player
+    def __init__(self,x,y,width,height,colour,level,health,health_max,damage): #for initializing the player
         self.x = x # player spawning x coord
         self.y = y # player spawning y coord
         self.width = width # width of player
@@ -19,6 +19,11 @@ class player:
         self.vel = 3 # how fast the player moves
         self.direction = 'up'
         self.rect = pygame.Rect(x,y,width,height) #player rect or 'hitbox'
+
+        self.level = level
+        self.health = health
+        self.health_max = health_max
+        self.damage = damage + self.level
     def draw(self): # for drawing the player
         self.rect.topleft = (self.x,self.y)
         pygame.draw.rect(win,self.colour,self.rect)
@@ -27,7 +32,7 @@ class player:
     
     # every swing, create a hitbox in the direction player is facing 
 
-class pickup(pygame.sprite.Sprite):
+class pickup(pygame.sprite.Group):
     def __init__(self,x,y,colour):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
@@ -41,7 +46,7 @@ class pickup(pygame.sprite.Sprite):
         pygame.draw.rect(win, self.colour, self.rect)
 
 
-class border(pygame.sprite.Sprite):
+class border(pygame.sprite.Group):
     def __init__(self,x,y,width,height):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
@@ -68,43 +73,84 @@ class menu():
         self.rect.topleft = (self.x,self.y)
         pygame.draw.rect(win,self.colour,self.rect)
 
-class projectile(pygame.sprite.Sprite):
-    def __init__(self,x,y,width,height,direction,colour):
+class projectile(pygame.sprite.Group):
+    def __init__(self,x,y,width,height,velocity,direction,colour,damage):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.colour = colour
-        self.vel = 6
+        self.velocity = velocity
         self.direction = direction
         self.rect = pygame.Rect(x,y,width,height)
+
+        self.damage = damage
     def draw(self): 
         self.rect.topleft = (self.x,self.y)
         pygame.draw.rect(win,self.colour,self.rect)
         
         if self.rect.colliderect(background_rect):
             if self.direction == 'left':
-                self.x -= self.vel
+                self.x -= self.velocity
                 
             if self.direction == 'right':
-                self.x += self.vel
+                self.x += self.velocity
 
             if self.direction == 'up':
-                self.y -= self.vel
+                self.y -= self.velocity
 
             if self.direction == 'down':
-                self.y += self.vel
-    
-# set direction to player direction on init YES
-# the bullet needs to spawn at the players CURRENT location, meaning
-# the bullet's initial x/y values need to be updated every frame
- 
-# last direction moved determines shoot direction
-# while projectile is colliding with background, WHILE self is on background
-# depending on direction shot (if statement),
-# continue moving in that direction
-# if a thingy is shot,
-# add a sprite to that group names projectile_+{i}
-# i+=1
-# shoot it
+                self.y += self.velocity
+
+class enemy(pygame.sprite.Group):
+    def __init__(self,x,y,width,height,velocity,direction,colour,health,health_max,damage):
+        pygame.sprite.Sprite.__init__(self)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.velocity = velocity
+        self.hurt_velocity = velocity//1.3
+        self.regular_velocity = velocity
+        self.direction = direction
+        self.colour = colour
+        self.rect = pygame.Rect(x,y,width,height)
+
+        self.health = health
+        self.health_max = health_max
+        self.damage = damage
+    def draw(self,border_left,border_right,border_top,border_bottom):
+        pygame.draw.rect(win,self.colour,self.rect)
+        self.rect.topleft = (self.x,self.y)
+        if self.rect.colliderect(border_right):
+            self.direction = 1
+        if self.rect.colliderect(border_left):
+            self.direction = 2
+        if self.rect.colliderect(border_top):
+            self.direction = 4
+        if self.rect.colliderect(border_bottom):
+            self.direction = 3
+
+        if self.rect.colliderect(background_rect):
+            if self.direction == 1:
+                self.x -= self.velocity 
+            if self.direction == 2:
+                self.x += self.velocity
+            if self.direction == 3:
+                self.y -= self.velocity
+            if self.direction == 4:
+                self.y += self.velocity
+            if self.direction == 0:
+                pass
+                
+    def collision(self,player,hurt_colour,weapon_hitbox,weapon_damage):
+        if self.rect.colliderect(player.rect):
+            player.colour = hurt_colour
+            player.health -= self.damage
+        if self.rect.colliderect(weapon_hitbox):
+            self.health -= weapon_damage
+            
+            self.velocity = self.hurt_velocity
+        else:
+            self.velocity = self.regular_velocity
